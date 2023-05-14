@@ -69,25 +69,22 @@ class KeyModal(discord.ui.Modal):
 class ApplicationModal(discord.ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.add_item(discord.ui.InputText(label="How did you find the server?", style=discord.InputTextStyle.short))
-        self.add_item(discord.ui.InputText(label="Who do you know from the server?", style=discord.InputTextStyle.short))
-        self.add_item(discord.ui.InputText(label="Why should we accept your application?", style=discord.InputTextStyle.long))
+        self.add_item(discord.ui.InputText(label="How did you find the server?", style=discord.InputTextStyle.short, max_length=1024))
+        self.add_item(discord.ui.InputText(label="Who do you know from the server?", style=discord.InputTextStyle.short, max_length=1024))
+        self.add_item(discord.ui.InputText(label="Why should we accept your application?", style=discord.InputTextStyle.long, max_length=1024))
 
     async def callback(self, interaction: discord.Interaction):
-        if len(self.children[0].value) > 1024 or len(self.children[1].value) > 1024 or len(self.children[2].value) > 1024:
-            await interaction.response.send_message(embeds=[discord.Embed(description="Application too long! Maximum 1024 characters per field.", color=16741752)], ephemeral=True, delete_after=10)
-        else:
-            db.ladd("applications", interaction.user.id)
-            embed = discord.Embed(color=6868735, timestamp=datetime.datetime.now())
-            embed.set_author(name=interaction.user.name, icon_url=interaction.user.display_avatar)
-            embed.add_field(name="How did you find the server?", value=self.children[0].value, inline=False)
-            embed.add_field(name="Who do you know from the server?", value=self.children[1].value, inline=False)
-            embed.add_field(name="Why should we accept your application?", value=self.children[2].value, inline=False)
-            application_message = await bot.get_channel(env.applications_channel_id()).send(embeds=[embed])
-            await application_message.add_reaction("👍")
-            await application_message.add_reaction("👎")
-            db.set(str(application_message.id), interaction.user.id)
-            await interaction.response.send_message(embeds=[discord.Embed(description="The application has been sent. We will inform you as soon as we have news. However, do not leave the server. Otherwise, the role cannot be assigned to you.", color=5956228)], ephemeral=True)
+        db.ladd("applications", interaction.user.id)
+        embed = discord.Embed(color=6868735, timestamp=datetime.datetime.now())
+        embed.set_author(name=interaction.user.name, icon_url=interaction.user.display_avatar)
+        embed.add_field(name="How did you find the server?", value=self.children[0].value, inline=False)
+        embed.add_field(name="Who do you know from the server?", value=self.children[1].value, inline=False)
+        embed.add_field(name="Why should we accept your application?", value=self.children[2].value, inline=False)
+        application_message = await bot.get_channel(env.applications_channel_id()).send(embeds=[embed])
+        await application_message.add_reaction("👍")
+        await application_message.add_reaction("👎")
+        db.set(str(application_message.id), interaction.user.id)
+        await interaction.response.send_message(embeds=[discord.Embed(description="The application has been sent. We will inform you as soon as we have news. However, do not leave the server. Otherwise, the role cannot be assigned to you.", color=5956228)], ephemeral=True)
 
 
 class DebridButton(discord.ui.View):
