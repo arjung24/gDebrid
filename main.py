@@ -7,7 +7,7 @@ import utils
 import datetime
 import pickledb
 
-bot = discord.Bot()
+bot = discord.Bot(intents=discord.Intents.all())
 db = pickledb.load("db.json", True)
 
 
@@ -203,7 +203,7 @@ async def answer_application(accepted: bool, ctx, message: discord.Message):
                     await ctx.response.send_message(embeds=[discord.Embed(description="User got accepted.", color=5956228)], ephemeral=True, delete_after=5)
                 else:
                     await member.ban(reason="Your application was rejected")
-                    await ctx.response.send_message(embeds=[discord.Embed(description="User got baned.", color=5956228)], ephemeral=True, delete_after=5)
+                    await ctx.response.send_message(embeds=[discord.Embed(description="User got banned.", color=5956228)], ephemeral=True, delete_after=5)
             else:
                 await ctx.response.send_message(embeds=[discord.Embed(description="Error: applicant left guild!", color=16741752)], ephemeral=True, delete_after=5)
         else:
