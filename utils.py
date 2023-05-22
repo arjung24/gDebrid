@@ -32,9 +32,6 @@ def g_debrid(link: str):
     out = base64.b64encode(bytes(out, 'utf-8')).decode('utf-8')
     if out.endswith("=="):
         out = out[:-2]
-    file = base64.b64encode(bytes(file, 'utf-8')).decode('utf-8')
-    if file.endswith("=="):
-        file = file[:-2]
 
     return f"https://debrid.gookie.dev/{urllib.parse.quote(out, safe='')}/{file}"
 
