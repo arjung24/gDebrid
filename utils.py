@@ -5,6 +5,7 @@ import urllib.parse
 import env
 import random
 import string
+import time
 
 
 def format_bytes(size: int):
@@ -20,19 +21,22 @@ def format_bytes(size: int):
 
 
 def g_debrid(link: str):
-    server = link.split("https://")[1].split(".download.real-debrid.com/d/")[0]
     data = link.split(".download.real-debrid.com/d/")[1].split("/")[0]
     file = link.split(f"{data}/")[1]
+    data += f':{str(round(int(time.time())))}:{link.split("https://")[1].split(".download.real-debrid.com/d/")[0]}'
     password = env.g_debrid_password()
     iv = env.g_debrid_iv()
-    msg = pad(data.encode(), AES.block_size)
-    cipher = AES.new(password, AES.MODE_CBC, iv)
-    cipher_text = cipher.encrypt(msg)
-    out = base64.b64encode(cipher_text).decode('utf-8')
+    out = base64.b64encode(AES.new(password, AES.MODE_CBC, iv).encrypt(pad(data.encode(), AES.block_size))).decode('utf-8')
+    if out.endswith("="):
+        out = out[:-1]
     out = base64.b64encode(bytes(out, 'utf-8')).decode('utf-8')
     if out.endswith("=="):
         out = out[:-2]
-    return f"https://debrid.gookie.dev/{server}/{urllib.parse.quote(out, safe='')}/{file}"
+    file = base64.b64encode(bytes(file, 'utf-8')).decode('utf-8')
+    if file.endswith("=="):
+        file = file[:-2]
+
+    return f"https://debrid.gookie.dev/{urllib.parse.quote(out, safe='')}/{file}"
 
 
 def gen_key():
