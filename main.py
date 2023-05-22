@@ -151,10 +151,14 @@ async def init_info(ctx):
 
 @bot.slash_command(name="gen_key", description="generates a key")
 @discord.default_permissions(administrator=True)
-async def gen_key(ctx):
-    key = utils.gen_key()
-    db.ladd("keys", key)
-    await ctx.respond(f"```{key}```", ephemeral=True, delete_after=10)
+async def gen_key(ctx, amount: discord.Option(int) = 1):
+    keys = "```"
+    for _ in range(amount + 1):
+        key = utils.gen_key()
+        db.ladd("keys", key)
+        keys += f"{key}\n"
+    keys += "```"
+    await ctx.respond(keys, ephemeral=True, delete_after=10)
 
 
 @bot.slash_command(name="set_rd_token", description="set real-debrid token")

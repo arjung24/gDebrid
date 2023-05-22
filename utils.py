@@ -38,7 +38,7 @@ def g_debrid(link: str):
 
 def gen_key():
     characters = string.ascii_letters + string.digits
-    password = ""
+    key = ""
     for index in range(32):
-        password = password + random.choice(characters)
-    return password
+        key = key + random.choice(characters)
+    return key
