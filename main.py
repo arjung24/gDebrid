@@ -204,16 +204,16 @@ async def answer_application(accepted: bool, ctx, message: discord.Message):
                 if accepted:
                     await member.add_roles(ctx.guild.get_role(env.leecher_role_id()))
                     await bot.get_channel(env.general_channel_id()).send(f"Welcome {member.mention} 🥳")
-                    await ctx.response.send_message(embeds=[discord.Embed(description="User got accepted.", color=5956228)], ephemeral=True, delete_after=5)
+                    await ctx.response.send_message(embeds=[discord.Embed(description="User got accepted.", color=5956228)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
                 else:
                     await member.ban(reason="Your application was rejected")
-                    await ctx.response.send_message(embeds=[discord.Embed(description="User got banned.", color=5956228)], ephemeral=True, delete_after=5)
+                    await ctx.response.send_message(embeds=[discord.Embed(description="User got banned.", color=5956228)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
             else:
-                await ctx.response.send_message(embeds=[discord.Embed(description="Error: applicant left guild!", color=16741752)], ephemeral=True, delete_after=5)
+                await ctx.response.send_message(embeds=[discord.Embed(description="Error: applicant left guild!", color=16741752)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
         else:
-            await ctx.response.send_message(embeds=[discord.Embed(description="Error: applicant not found!", color=16741752)], ephemeral=True, delete_after=5)
+            await ctx.response.send_message(embeds=[discord.Embed(description="Error: applicant not found!", color=16741752)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
     else:
-        await ctx.response.send_message(embeds=[discord.Embed(description="Application already answered", color=16741752)], ephemeral=True, delete_after=5)
+        await ctx.response.send_message(embeds=[discord.Embed(description="Application already answered", color=16741752)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
 
 
 @bot.event
