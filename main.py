@@ -286,6 +286,7 @@ async def torrent2magnet(ctx, torrent: discord.Attachment):
 
 
 @bot.slash_command(name="get_active_torrents", description="returns a list with all active torrents")
+@discord.default_permissions(administrator=True)
 async def get_active_torrents(ctx):
     await ctx.defer()
     description = ""
@@ -294,10 +295,11 @@ async def get_active_torrents(ctx):
         description += f"{msg.embeds[0].title} {msg.jump_url}\n"
     if description == "":
         description = "No active torrent"
-    await ctx.followup.send(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
+    await ctx.followup.send(embeds=[discord.Embed(description=description, color=green)])
 
 
 @bot.slash_command(name="get_unreviewed_applications", description="returns a list with all unreviewed applications")
+@discord.default_permissions(administrator=True)
 async def get_unreviewed_applications(ctx):
     await ctx.defer()
     description = ""
@@ -308,7 +310,7 @@ async def get_unreviewed_applications(ctx):
             description += f"{msg.embeds[0].author.name} {msg.jump_url}\n"
     if description == "":
         description = "No unreviewed application"
-    await ctx.followup.send(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
+    await ctx.followup.send(embeds=[discord.Embed(description=description, color=green)])
 
 
 @bot.event
