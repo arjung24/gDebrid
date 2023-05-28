@@ -274,51 +274,44 @@ async def set_rd_token(ctx, token: discord.Option(str)):
     await ctx.respond("done", ephemeral=True, delete_after=10)
 
 
-@bot.message_command(name="accept application")
-@discord.default_permissions(administrator=True)
-async def accept_application(ctx, message: discord.Message):
-    await answer_application(True, ctx, message)
-
-
-@bot.message_command(name="reject application")
-@discord.default_permissions(administrator=True)
-async def reject_application(ctx, message: discord.Message):
-    await answer_application(False, ctx, message)
-
-
-async def answer_application(accepted: bool, ctx, message: discord.Message):
-    if db.exists(str(message.id)):
-        applicant = db.get(str(message.id))
-        db.rem(str(message.id))
-        if db.lexists("applications", applicant):
-            db.lremvalue("applications", applicant)
-        db.dump()
-        if accepted:
-            color = green
-        else:
-            color = red
-        embed = discord.Embed(color=color)
-        embed.set_author(name=message.embeds[0].author.name, icon_url=message.embeds[0].author.icon_url)
-        embed.add_field(name="How did you find the server?", value=message.embeds[0].fields[0].value, inline=False)
-        embed.add_field(name="Who do you know from the server?", value=message.embeds[0].fields[1].value, inline=False)
-        embed.add_field(name="Why should we accept your application?", value=message.embeds[0].fields[2].value, inline=False)
-        await message.edit(embeds=[embed])
-        if applicant:
-            member = ctx.guild.get_member(applicant)
-            if member:
-                if accepted:
-                    await member.add_roles(ctx.guild.get_role(env.leecher_role_id()))
-                    await bot.get_channel(env.general_channel_id()).send(f"Welcome {member.mention} 🥳")
-                    await ctx.response.send_message(embeds=[discord.Embed(description="User got accepted.", color=green)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
+@bot.event
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    if payload.member.guild_permissions.administrator:
+        if not payload.member.bot:
+            if db.exists(str(payload.message_id)):
+                if payload.emoji.name == "👍":
+                    accepted = True
+                elif payload.emoji.name == "👎":
+                    accepted = False
                 else:
-                    await member.ban(reason="Your application was rejected")
-                    await ctx.response.send_message(embeds=[discord.Embed(description="User got banned.", color=green)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
-            else:
-                await ctx.response.send_message(embeds=[discord.Embed(description="Error: applicant left guild!", color=red)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
-        else:
-            await ctx.response.send_message(embeds=[discord.Embed(description="Error: applicant not found!", color=red)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
-    else:
-        await ctx.response.send_message(embeds=[discord.Embed(description="Application already answered", color=red)], ephemeral=True, delete_after=5, allowed_mentions=discord.AllowedMentions(users=False))
+                    return
+                applicant = db.get(str(payload.message_id))
+                db.rem(str(payload.message_id))
+                if db.lexists("applications", applicant):
+                    db.lremvalue("applications", applicant)
+                db.dump()
+                if accepted:
+                    color = green
+                else:
+                    color = red
+                embed = discord.Embed(color=color)
+                guild = bot.get_guild(payload.guild_id)
+                if guild is None:
+                    return
+                message = bot.get_message(payload.message_id)
+                embed.set_author(name=message.embeds[0].author.name, icon_url=message.embeds[0].author.icon_url)
+                embed.add_field(name="How did you find the server?", value=message.embeds[0].fields[0].value, inline=False)
+                embed.add_field(name="Who do you know from the server?", value=message.embeds[0].fields[1].value, inline=False)
+                embed.add_field(name="Why should we accept your application?", value=message.embeds[0].fields[2].value, inline=False)
+                await message.edit(embeds=[embed])
+                if applicant:
+                    member = guild.get_member(applicant)
+                    if member:
+                        if accepted:
+                            await member.add_roles(guild.get_role(env.leecher_role_id()))
+                            await bot.get_channel(env.general_channel_id()).send(f"Welcome {member.mention} 🥳")
+                        else:
+                            await member.ban(reason="Your application was rejected")
 
 
 @bot.event
