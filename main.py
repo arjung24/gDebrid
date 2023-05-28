@@ -274,6 +274,29 @@ async def set_rd_token(ctx, token: discord.Option(str)):
     await ctx.respond("done", ephemeral=True, delete_after=10)
 
 
+@bot.slash_command(name="get_active_torrents", description="returns a list with all active torrents")
+async def get_active_torrents(ctx):
+    description = ""
+    for msg_id in list(db.get("torrents")):
+        msg = await bot.get_channel(env.torrent_channel_id()).fetch_message(int(msg_id))
+        description += f"{msg.embeds[0].title} {msg.jump_url}\n"
+    if description == "":
+        description = "No active torrent"
+    await ctx.respond(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
+
+
+@bot.slash_command(name="get_unreviewed_applications", description="returns a list with all unreviewed applications")
+async def get_unreviewed_applications(ctx):
+    description = ""
+    applications = db.lgetall("applications")
+    for a in db.getall():
+        if db.get(a) in applications:
+            msg = await bot.get_channel(env.applications_channel_id()).fetch_message(int(a))
+            description += f"{msg.embeds[0].author.name} {msg.jump_url}\n"
+    if description == "":
+        description = "No unreviewed application"
+    await ctx.respond(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
+
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     if payload.member.guild_permissions.administrator:
@@ -298,7 +321,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
                 guild = bot.get_guild(payload.guild_id)
                 if guild is None:
                     return
-                message = bot.get_message(payload.message_id)
+                message = await bot.get_channel(env.applications_channel_id()).fetch_message(int(payload.message_id))
                 embed.set_author(name=message.embeds[0].author.name, icon_url=message.embeds[0].author.icon_url)
                 embed.add_field(name="How did you find the server?", value=message.embeds[0].fields[0].value, inline=False)
                 embed.add_field(name="Who do you know from the server?", value=message.embeds[0].fields[1].value, inline=False)
