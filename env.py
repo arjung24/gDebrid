@@ -13,6 +13,10 @@ def log_channel_id():
     return int(get_key(".env", "log_channel_id"))
 
 
+def torrent_channel_id():
+    return int(get_key(".env", "torrent_channel_id"))
+
+
 def status_channel_id():
     return int(get_key(".env", "status_channel_id"))
 
