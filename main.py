@@ -274,6 +274,17 @@ async def set_rd_token(ctx, token: discord.Option(str)):
     await ctx.respond("done", ephemeral=True, delete_after=10)
 
 
+@bot.slash_command(name="torrent2magnet", description="converts torrent file to magnet link")
+async def torrent2magnet(ctx, torrent: discord.Attachment):
+    magnet = utils.torrent2magnet(torrent)
+    embed: discord.Embed
+    if magnet == "failed":
+        embed = discord.Embed(description="Failed to convert the torrent", color=red)
+    else:
+        embed = discord.Embed(description=magnet, color=green)
+    await ctx.respond(embeds=[embed], ephemeral=True)
+
+
 @bot.slash_command(name="get_active_torrents", description="returns a list with all active torrents")
 async def get_active_torrents(ctx):
     await ctx.defer()
@@ -298,6 +309,7 @@ async def get_unreviewed_applications(ctx):
     if description == "":
         description = "No unreviewed application"
     await ctx.followup.send(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
+
 
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):

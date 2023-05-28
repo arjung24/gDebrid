@@ -1,4 +1,6 @@
 import base64
+from io import BytesIO
+import requests
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import urllib.parse
@@ -6,6 +8,7 @@ import env
 import random
 import string
 import time
+import torf
 
 
 def format_bytes(size: int):
@@ -42,3 +45,10 @@ def gen_key():
     for index in range(32):
         key = key + random.choice(characters)
     return key
+
+
+def torrent2magnet(torrent):
+    try:
+        return torf.Torrent().read_stream(BytesIO(requests.get(torrent.url).content)).magnet()
+    except:
+        return "failed"
