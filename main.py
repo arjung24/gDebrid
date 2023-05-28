@@ -25,6 +25,7 @@ class DebridModal(discord.ui.Modal):
         await interaction.response.defer()
         input_lines = self.children[0].value.split("\n")
         unrestricted_links = []
+        embeds = []
         for input_line in input_lines:
             if input_line:
                 if ":http" in input_line:
@@ -47,8 +48,12 @@ class DebridModal(discord.ui.Modal):
                     unrestricted = db.get("unrestricted")
                     db.set("unrestricted", unrestricted + unrestricted_link.data["filesize"])
                     unrestricted_links.append(Page(embeds=[success_unrestrict_embed(unrestricted_link.data, download_link, False)]))
-                    await bot.get_channel(env.log_channel_id()).send(
-                        embeds=[success_unrestrict_embed(unrestricted_link.data, unrestricted_link.data["link"], True, interaction.user)])
+                    embeds.append(success_unrestrict_embed(unrestricted_link.data, unrestricted_link.data["link"], True, interaction.user))
+                    if len(embeds) == 10:
+                        await bot.get_channel(env.log_channel_id()).send(embeds=embeds)
+                        embeds = []
+        if len(embeds) >= 1:
+            await bot.get_channel(env.log_channel_id()).send(embeds=embeds)
         paginator = Paginator(pages=unrestricted_links, timeout=300)
         paginator.remove_button("first")
         paginator.remove_button("last")
