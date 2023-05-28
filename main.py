@@ -26,6 +26,7 @@ class DebridModal(discord.ui.Modal):
         input_lines = self.children[0].value.split("\n")
         unrestricted_links = []
         embeds = []
+        dm = ""
         for input_line in input_lines:
             if input_line:
                 if ":http" in input_line:
@@ -47,6 +48,7 @@ class DebridModal(discord.ui.Modal):
                     download_link = utils.g_debrid(download_link)
                     unrestricted = db.get("unrestricted")
                     db.set("unrestricted", unrestricted + unrestricted_link.data["filesize"])
+                    dm += f"{download_link}\n"
                     unrestricted_links.append(Page(embeds=[success_unrestrict_embed(unrestricted_link.data, download_link, False)]))
                     embeds.append(success_unrestrict_embed(unrestricted_link.data, unrestricted_link.data["link"], True, interaction.user))
                     if len(embeds) == 10:
@@ -54,6 +56,10 @@ class DebridModal(discord.ui.Modal):
                         embeds = []
         if len(embeds) >= 1:
             await bot.get_channel(env.log_channel_id()).send(embeds=embeds)
+        try:
+            await interaction.user.send(content=str(interaction.id), file=discord.File(BytesIO(str.encode(dm)), filename=f"{interaction.id}.txt"))
+        except:
+            await bot.get_channel(env.general_channel_id()).send(interaction.user.mention, embeds=[discord.Embed(description="You are blocking direct messages. I cannot send you the download link for your request.", color=red)])
         paginator = Paginator(pages=unrestricted_links, timeout=300)
         paginator.remove_button("first")
         paginator.remove_button("last")
