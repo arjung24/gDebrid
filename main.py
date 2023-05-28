@@ -276,17 +276,19 @@ async def set_rd_token(ctx, token: discord.Option(str)):
 
 @bot.slash_command(name="get_active_torrents", description="returns a list with all active torrents")
 async def get_active_torrents(ctx):
+    await ctx.defer()
     description = ""
     for msg_id in list(db.get("torrents")):
         msg = await bot.get_channel(env.torrent_channel_id()).fetch_message(int(msg_id))
         description += f"{msg.embeds[0].title} {msg.jump_url}\n"
     if description == "":
         description = "No active torrent"
-    await ctx.respond(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
+    await ctx.followup.send(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
 
 
 @bot.slash_command(name="get_unreviewed_applications", description="returns a list with all unreviewed applications")
 async def get_unreviewed_applications(ctx):
+    await ctx.defer()
     description = ""
     applications = db.lgetall("applications")
     for a in db.getall():
@@ -295,7 +297,7 @@ async def get_unreviewed_applications(ctx):
             description += f"{msg.embeds[0].author.name} {msg.jump_url}\n"
     if description == "":
         description = "No unreviewed application"
-    await ctx.respond(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
+    await ctx.followup.send(embeds=[discord.Embed(description=description, color=green)], ephemeral=True)
 
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
